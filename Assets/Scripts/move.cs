@@ -19,10 +19,18 @@ public class PlayerMovement : MonoBehaviour
     private float horizontalInput;
     private bool jumpRequested;
     private bool isGrounded;
+    public gameLogic logic;
+    private bool isBirdAlive = true;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    void Start()
+    {
+        isBirdAlive = true;
+        logic = GameObject.FindGameObjectWithTag("Logic").GetComponent<gameLogic>();
     }
 
     private void Update()
@@ -35,7 +43,7 @@ public class PlayerMovement : MonoBehaviour
             groundLayer
         );
 
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded )
         {
             jumpRequested = true;
         }
@@ -43,12 +51,15 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        rb.velocity = new Vector2(
-            horizontalInput * moveSpeed,
-            rb.velocity.y
-        );
+        if (isBirdAlive)
+        {
+            rb.velocity = new Vector2(
+                horizontalInput * moveSpeed,
+                rb.velocity.y
+                );
+        }
 
-        if (jumpRequested)
+        if (jumpRequested )
         {
             rb.velocity = new Vector2(
                 rb.velocity.x,
@@ -69,6 +80,16 @@ public class PlayerMovement : MonoBehaviour
             groundCheck.position,
             groundCheckRadius
         );
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.layer == 7 || collision.gameObject.layer == 8)
+        {
+            Destroy(collision.gameObject);
+            logic.gameOver();
+            isBirdAlive = false;   
+        }
     }
 
 }
